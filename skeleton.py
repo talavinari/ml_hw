@@ -8,104 +8,6 @@ import intervals
 
 
 class Assignment2(object):
-
-    def get_prob_to_get_value_1(self, interval):
-        if not self.is_in_one_section(interval):
-            raise ValueError('cant get prob for given interval')
-        if interval[1] <= 0.2:
-            return 0.8
-        elif interval[0] >= 0.2 and interval[1] <= 0.4:
-            return 0.1
-        elif interval[0] >= 0.4 and interval[1] <= 0.6:
-            return 0.8
-        elif interval[0] >= 0.6 and interval[1] <= 0.8:
-            return 0.1
-        elif interval[0] >= 0.8 and interval[1] <= 1:
-            return 0.8
-        else:
-            print("error, invalid interval")
-            return None
-
-    def is_in_one_section(self, interval):
-        if interval[1] <= 0.2:
-            return True
-        elif interval[0] >= 0.2 and interval[1] <= 0.4:
-            return True
-        elif interval[0] >= 0.4 and interval[1] <= 0.6:
-            return True
-        elif interval[0] >= 0.6 and interval[1] <= 0.8:
-            return True
-        elif interval[0] >= 0.8 and interval[1] <= 1:
-            return True
-        else:
-            return False
-
-    def split_interval(self, interval):
-        new_intervals = []
-        is_one_section = self.is_in_one_section(interval)
-        if is_one_section:
-            new_intervals.append(interval)
-        else:
-            cut_place = 0
-            if interval[0] < 0.2 and interval[1] > 0.2:
-                new_intervals.append((interval[0], 0.2))
-                cut_place = 0.2
-            elif interval[0] < 0.4 and interval[1] > 0.4:
-                new_intervals.append((interval[0], 0.4))
-                cut_place = 0.4
-            elif interval[0] < 0.6 and interval[1] > 0.6:
-                new_intervals.append((interval[0], 0.6))
-                cut_place = 0.6
-            elif interval[0] < 0.8 and interval[1] > 0.8:
-                new_intervals.append((interval[0], 0.8))
-                cut_place = 0.8
-            new_intervals.extend(self.split_interval((cut_place, interval[1])))
-
-        return new_intervals
-
-    def split_intervals(self, intervals):
-        new_intervals = []
-        interval_prediction = []
-        prev = 0
-        for interval in intervals:
-            # handle 0 prediction between the hypothesis intervals
-            splitted_intervals = self.split_interval((prev, interval[0]))
-            new_intervals.extend(splitted_intervals)
-            for x in range(len(splitted_intervals)):
-                interval_prediction.append(0)
-
-            # handle ERM intervals
-            splitted_intervals = self.split_interval(interval)
-            new_intervals.extend(splitted_intervals)
-            for x in range(len(splitted_intervals)):
-                interval_prediction.append(1)
-
-            prev = interval[1]
-
-        # handle final hypothesis interval to number - 1
-        splitted_intervals = self.split_interval((intervals[len(intervals) - 1][1], 1))
-        new_intervals.extend(splitted_intervals)
-        for x in range(len(splitted_intervals)):
-            interval_prediction.append(0)
-
-        return new_intervals, interval_prediction
-
-    def calc_true_error(self, h):
-        new_intervals, interval_prediction = self.split_intervals(h)
-        true_error = 0
-        for i in range(0, len(new_intervals)):
-            interval = new_intervals[i]
-            prob_to_interval = interval[1] - interval[0]
-            prob_to_1 = self.get_prob_to_get_value_1(interval)
-
-            # the interval stands for 0 prediction
-            if interval_prediction[i] == 0:
-                true_error += (prob_to_interval * prob_to_1)
-            # the interval stands for 1 prediction
-            else:
-                true_error += (prob_to_interval * (1 - prob_to_1))
-        return true_error
-
     """Assignment 2 skeleton.
     Please use these function signatures for this assignment and submit this file, together with the intervals.py.
     """
@@ -241,20 +143,46 @@ class Assignment2(object):
         lowest_true_error_index = sorted_indices[0]
         return int(experiment_results[lowest_true_error_index][0])
 
-
     def experiment_k_range_srm(self, m, k_first, k_last, step):
         """Runs the experiment in (d).
         Plots additionally the penalty for the best ERM hypothesis.
         and the sum of penalty and empirical error.
         Input: m - an integer, the size of the data sample.
                k_first - an integer, the maximum number of intervals in the first experiment.
-               m_last - an integer, the maximum number of intervals in the last experiment.
+               k_last - an integer, the maximum number of intervals in the last experiment.
                step - an integer, the difference between the size of k in each experiment.
 
         Returns: The best k value (an integer) according to the SRM algorithm.
         """
-        # TODO: Implement the loop
-        pass
+
+        sample = self.sample_from_D(m)
+        steps = (k_last - k_first) / step + 1
+        experiment_results = np.ndarray(shape=(int(steps), 3), dtype=float)
+        result_index = 0
+
+        for k in range(k_first, k_last + 1, step):
+            print("starting k = " + str(k) + "....")
+            hypothesis, empirical_errors = intervals.find_best_interval(sample[:, 0], sample[:, 1], k)
+            empirical_error_rate = (empirical_errors / m)
+            print("e(s) = " + str(empirical_error_rate))
+            # TODO what is the penalty?
+            penalty = self.calc_penalty(k)
+            experiment_results[result_index] = [k, empirical_error_rate, penalty, penalty + empirical_error_rate]
+            print(experiment_results[result_index])
+            result_index += 1
+
+        plt.title('Empirical error (blue), penalty (red), e(s) + penalty (green) as a function of k')
+        plt.ylabel('error')
+        plt.xlabel('k - max interval size')
+        plt.plot(experiment_results[:, 0], experiment_results[:, 1], color='blue')
+        plt.plot(experiment_results[:, 0], experiment_results[:, 2], color='red')
+        plt.plot(experiment_results[:, 0], experiment_results[:, 3], color='green')
+        plt.axis([k_first - 1, k_last + 1, 0, 10])
+        plt.show()
+
+        sorted_indices = np.argsort(experiment_results[:, 3])
+        lowest_penalty_with_empirical_error = sorted_indices[0]
+        return int(experiment_results[lowest_penalty_with_empirical_error][0])
 
     def cross_validation(self, m, T):
         """Finds a k that gives a good test error.
@@ -265,22 +193,160 @@ class Assignment2(object):
         Returns: The best k value (an integer) found by the cross validation algorithm.
         """
         sample = self.sample_from_D(m)
-        seed = 0
-        size_of_random = 0.2 * m
-        max_number = m
-        holdout_idx = np.random.RandomState(seed).choice(max_number, size_of_random)
-        train = sample[holdout_idx[:10000], :]
-        print(holdout_idx)
-        # for k in range(1, 11):
-        #     hypothesis, empirical_errors = intervals.find_best_interval(sample[:, 0], sample[:, 1], k)
+        experiment_results = []
+        ks = []
+        for k in range(1, 11):
+            ks.append(k)
+            total_errors = 0
+            print("running with k=" + str(k))
+            holdout_size = 0
+            for t in range(0, T):
+                train_sample, holdout_samples = self.split_sample_for_cross(sample, t)
+                holdout_size = len(holdout_samples)
+                hypothesis, empirical_errors = intervals.find_best_interval(train_sample[:, 0], train_sample[:, 1], k)
+                for test in holdout_samples:
+                    if self.predict(hypothesis, test[0]) != test[1]:
+                        total_errors += 1
 
+            holdout_error = (total_errors / T) / holdout_size
+            print("AVG errors after 3 runs is : " + str(holdout_error))
+            experiment_results.append(holdout_error)
 
+        plt.title('Avg e(hold_out) as a function of best h in k size interval')
+        plt.ylabel('avg e(hold_out)')
+        plt.xlabel('ERM result of max k intervals hypothesis class')
+        plt.plot(ks, experiment_results, 'ro', color='blue')
+        plt.axis([0, 11, 0, 1])
+        plt.show()
 
+        return np.argmin(experiment_results) + 1
 
-#################################
-# Place for additional methods
+    def get_prob_to_get_value_1(self, interval):
+        if not self.is_in_one_section(interval):
+            raise ValueError('cant get prob for given interval')
+        if interval[1] <= 0.2:
+            return 0.8
+        elif interval[0] >= 0.2 and interval[1] <= 0.4:
+            return 0.1
+        elif interval[0] >= 0.4 and interval[1] <= 0.6:
+            return 0.8
+        elif interval[0] >= 0.6 and interval[1] <= 0.8:
+            return 0.1
+        elif interval[0] >= 0.8 and interval[1] <= 1:
+            return 0.8
+        else:
+            print("error, invalid interval")
+            return None
 
-#################################
+    def is_in_one_section(self, interval):
+        if interval[1] <= 0.2:
+            return True
+        elif interval[0] >= 0.2 and interval[1] <= 0.4:
+            return True
+        elif interval[0] >= 0.4 and interval[1] <= 0.6:
+            return True
+        elif interval[0] >= 0.6 and interval[1] <= 0.8:
+            return True
+        elif interval[0] >= 0.8 and interval[1] <= 1:
+            return True
+        else:
+            return False
+
+    def split_interval(self, interval):
+        new_intervals = []
+        is_one_section = self.is_in_one_section(interval)
+        if is_one_section:
+            new_intervals.append(interval)
+        else:
+            cut_place = 0
+            if interval[0] < 0.2 and interval[1] > 0.2:
+                new_intervals.append((interval[0], 0.2))
+                cut_place = 0.2
+            elif interval[0] < 0.4 and interval[1] > 0.4:
+                new_intervals.append((interval[0], 0.4))
+                cut_place = 0.4
+            elif interval[0] < 0.6 and interval[1] > 0.6:
+                new_intervals.append((interval[0], 0.6))
+                cut_place = 0.6
+            elif interval[0] < 0.8 and interval[1] > 0.8:
+                new_intervals.append((interval[0], 0.8))
+                cut_place = 0.8
+            new_intervals.extend(self.split_interval((cut_place, interval[1])))
+
+        return new_intervals
+
+    def split_intervals(self, intervals):
+        new_intervals = []
+        interval_prediction = []
+        prev = 0
+        for interval in intervals:
+            # handle 0 prediction between the hypothesis intervals
+            splitted_intervals = self.split_interval((prev, interval[0]))
+            new_intervals.extend(splitted_intervals)
+            for x in range(len(splitted_intervals)):
+                interval_prediction.append(0)
+
+            # handle ERM intervals
+            splitted_intervals = self.split_interval(interval)
+            new_intervals.extend(splitted_intervals)
+            for x in range(len(splitted_intervals)):
+                interval_prediction.append(1)
+
+            prev = interval[1]
+
+        # handle final hypothesis interval to number - 1
+        splitted_intervals = self.split_interval((intervals[len(intervals) - 1][1], 1))
+        new_intervals.extend(splitted_intervals)
+        for x in range(len(splitted_intervals)):
+            interval_prediction.append(0)
+
+        return new_intervals, interval_prediction
+
+    def calc_true_error(self, h):
+        new_intervals, interval_prediction = self.split_intervals(h)
+        true_error = 0
+        for i in range(0, len(new_intervals)):
+            interval = new_intervals[i]
+            prob_to_interval = interval[1] - interval[0]
+            prob_to_1 = self.get_prob_to_get_value_1(interval)
+
+            # the interval stands for 0 prediction
+            if interval_prediction[i] == 0:
+                true_error += (prob_to_interval * prob_to_1)
+            # the interval stands for 1 prediction
+            else:
+                true_error += (prob_to_interval * (1 - prob_to_1))
+        return true_error
+
+    def split_sample_for_cross(self, original_sample, seed):
+        size_of_hold_out = int(0.2 * len(original_sample))
+        max_number = len(original_sample) - 1
+        holdout_random_indices = np.random.RandomState(seed).choice(max_number, size_of_hold_out, replace=False)
+
+        holdout_samples = np.ndarray(shape=(size_of_hold_out, 2), dtype=float)
+        train_samples = np.ndarray(shape=(len(original_sample) - size_of_hold_out, 2), dtype=float)
+
+        holdout_index = 0
+        train_index = 0
+        for index, sample in enumerate(original_sample):
+            if index in holdout_random_indices:
+                holdout_samples[holdout_index] = original_sample[index]
+                holdout_index += 1
+            else:
+                train_samples[train_index] = original_sample[index]
+                train_index += 1
+
+        return train_samples, holdout_samples
+
+    def predict(self, hypothesis, x):
+        for interval in hypothesis:
+            if interval[0] <= x <= interval[1]:
+                return 1
+
+        return 0
+
+    def calc_penalty(self, k):
+        return -1
 
 
 if __name__ == '__main__':
@@ -288,5 +354,5 @@ if __name__ == '__main__':
     # ass.draw_sample_intervals(100, 3)
     # ass.experiment_m_range_erm(10, 100, 5, 3, 100)
     # ass.experiment_k_range_erm(1500, 1, 10, 1)
-    # ass.experiment_k_range_srm(1500, 1, 20, 1)
+    # ass.experiment_k_range_srm(1500, 1, 10, 1)
     # ass.cross_validation(1500, 3)
