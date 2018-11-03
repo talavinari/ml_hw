@@ -90,6 +90,22 @@ class Assignment2(object):
 
         return new_intervals, interval_prediction
 
+    def calc_true_error(self, h):
+        new_intervals, interval_prediction = self.split_intervals(h)
+        true_error = 0
+        for i in range(0, len(new_intervals)):
+            interval = new_intervals[i]
+            prob_to_interval = interval[1] - interval[0]
+            prob_to_1 = self.get_prob_to_get_value_1(interval)
+
+            # the interval stands for 0 prediction
+            if interval_prediction[i] == 0:
+                true_error += (prob_to_interval * prob_to_1)
+            # the interval stands for 1 prediction
+            else:
+                true_error += (prob_to_interval * (1 - prob_to_1))
+        return true_error
+
     """Assignment 2 skeleton.
     Please use these function signatures for this assignment and submit this file, together with the intervals.py.
     """
@@ -165,22 +181,8 @@ class Assignment2(object):
             total_true_error_rate = 0
             for t in range(0, T):
                 sample = self.sample_from_D(m)
-                h, empirical_errors = intervals.find_best_interval(sample[:, 0], sample[:, 1], k)
-
-                new_intervals, interval_prediction = self.split_intervals(h)
-                true_error = 0
-                for i in range(0, len(new_intervals)):
-                    interval = new_intervals[i]
-                    prob_to_interval = interval[1] - interval[0]
-                    prob_to_1 = self.get_prob_to_get_value_1(interval)
-
-                    # the interval stands for 0 prediction
-                    if interval_prediction[i] == 0:
-                        true_error += (prob_to_interval * prob_to_1)
-                    # the interval stands for 1 prediction
-                    else:
-                        true_error += (prob_to_interval * (1 - prob_to_1))
-
+                hypothesis, empirical_errors = intervals.find_best_interval(sample[:, 0], sample[:, 1], k)
+                true_error = self.calc_true_error(hypothesis)
                 total_empirical_error_rate += (empirical_errors / m)
                 total_true_error_rate += true_error
 
@@ -208,8 +210,37 @@ class Assignment2(object):
 
         Returns: The best k value (an integer) according to the ERM algorithm.
         """
-        # TODO: Implement the loop
-        pass
+
+        sample = self.sample_from_D(m)
+
+        steps = (k_last - k_first) / step + 1
+        experiment_results = np.ndarray(shape=(int(steps), 3), dtype=float)
+        result_index = 0
+
+        for k in range(k_first, k_last + 1, step):
+            print("starting k = " + str(k) + "....")
+            hypothesis, empirical_errors = intervals.find_best_interval(sample[:, 0], sample[:, 1], k)
+            true_error = self.calc_true_error(hypothesis)
+            print("e(p) = " + str(true_error))
+            empirical_error_rate = (empirical_errors / m)
+            print("e(s) = " + str(empirical_error_rate))
+            experiment_results[result_index] = [k, empirical_error_rate, true_error]
+            print(experiment_results[result_index])
+            result_index += 1
+            print("####################################")
+
+        plt.title('True error (red) & Empirical error (blue) as a function of k')
+        plt.ylabel('error')
+        plt.xlabel('k - max interval size')
+        plt.plot(experiment_results[:, 0], experiment_results[:, 1], 'ro', color='blue')
+        plt.plot(experiment_results[:, 0], experiment_results[:, 2], 'ro', color='red')
+        plt.axis([k_first - 1, k_last + 1, 0, 0.7])
+        plt.show()
+
+        sorted_indices = np.argsort(experiment_results[:, 2])
+        lowest_true_error_index = sorted_indices[0]
+        return int(experiment_results[lowest_true_error_index][0])
+
 
     def experiment_k_range_srm(self, m, k_first, k_last, step):
         """Runs the experiment in (d).
@@ -233,8 +264,17 @@ class Assignment2(object):
 
         Returns: The best k value (an integer) found by the cross validation algorithm.
         """
-        # TODO: Implement me
-        pass
+        sample = self.sample_from_D(m)
+        seed = 0
+        size_of_random = 0.2 * m
+        max_number = m
+        holdout_idx = np.random.RandomState(seed).choice(max_number, size_of_random)
+        train = sample[holdout_idx[:10000], :]
+        print(holdout_idx)
+        # for k in range(1, 11):
+        #     hypothesis, empirical_errors = intervals.find_best_interval(sample[:, 0], sample[:, 1], k)
+
+
 
 
 #################################
@@ -245,10 +285,8 @@ class Assignment2(object):
 
 if __name__ == '__main__':
     ass = Assignment2()
-    ass.draw_sample_intervals(100, 3)
-
+    # ass.draw_sample_intervals(100, 3)
     # ass.experiment_m_range_erm(10, 100, 5, 3, 100)
-
-    # ass.experiment_k_range_erm(1500, 1, 20, 1)
+    # ass.experiment_k_range_erm(1500, 1, 10, 1)
     # ass.experiment_k_range_srm(1500, 1, 20, 1)
     # ass.cross_validation(1500, 3)
