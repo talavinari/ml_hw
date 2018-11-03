@@ -68,7 +68,7 @@ class Assignment2(object):
         interval_prediction = []
         prev = 0
         for interval in intervals:
-            # handle 0 place between the hypothesis intervals
+            # handle 0 prediction between the hypothesis intervals
             splitted_intervals = self.split_interval((prev, interval[0]))
             new_intervals.extend(splitted_intervals)
             for x in range(len(splitted_intervals)):
@@ -82,7 +82,7 @@ class Assignment2(object):
 
             prev = interval[1]
 
-        # handle final hypothesis interval to 1
+        # handle final hypothesis interval to number - 1
         splitted_intervals = self.split_interval((intervals[len(intervals) - 1][1], 1))
         new_intervals.extend(splitted_intervals)
         for x in range(len(splitted_intervals)):
@@ -128,6 +128,9 @@ class Assignment2(object):
         """
 
         sample_from_d = self.sample_from_D(m)
+        plt.title('Example of ' + str(m) + ' samples , and best intervals with size, k=' + str(k))
+        plt.ylabel('value')
+        plt.xlabel('x')
         plt.plot(sample_from_d[:, 0], sample_from_d[:, 1], 'ro')
         plt.axis([0, 1, -0.1, 1.1])
         plt.grid(axis='x', linestyle='-')
@@ -154,8 +157,10 @@ class Assignment2(object):
         n_steps = (m_last - m_first) / step + 1
         experiment_results = np.ndarray(shape=(int(n_steps), 2), dtype=float)
         result_index = 0
+        ms = []
 
         for m in range(m_first, m_last + 1, step):
+            ms.append(m)
             total_empirical_error_rate = 0
             total_true_error_rate = 0
             for t in range(0, T):
@@ -182,13 +187,15 @@ class Assignment2(object):
             experiment_results[result_index] = [total_empirical_error_rate / T, total_true_error_rate / T]
             result_index += 1
 
-            print("finished m = " + str(m))
+            # print("finished m = " + str(m))
 
-            # print("avg e(s) = " + str(total_empirical_error_rate / T))
-            # print("avg e(p) = " + str(total_true_error_rate / T))
-            # print("############################################################")
-            # print("############################################################")
-
+        plt.title('True error (red) & Empirical error (blue) as a function of m')
+        plt.ylabel('error')
+        plt.xlabel('m - sample size')
+        plt.plot(ms, experiment_results[:, 0], 'ro', color='blue')
+        plt.plot(ms, experiment_results[:, 1], 'ro', color='red')
+        plt.axis([m_first - 1, m_last + 1, 0, 0.6])
+        plt.show()
         return experiment_results
 
     def experiment_k_range_erm(self, m, k_first, k_last, step):
@@ -238,10 +245,10 @@ class Assignment2(object):
 
 if __name__ == '__main__':
     ass = Assignment2()
-    # ass.draw_sample_intervals(100, 3)
+    ass.draw_sample_intervals(100, 3)
 
     # ass.experiment_m_range_erm(10, 100, 5, 3, 100)
-    print(ass.experiment_m_range_erm(10, 50, 5, 3, 100))
+
     # ass.experiment_k_range_erm(1500, 1, 20, 1)
     # ass.experiment_k_range_srm(1500, 1, 20, 1)
     # ass.cross_validation(1500, 3)
