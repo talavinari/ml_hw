@@ -157,7 +157,7 @@ class Assignment2(object):
 
         sample = self.sample_from_D(m)
         steps = (k_last - k_first) / step + 1
-        experiment_results = np.ndarray(shape=(int(steps), 3), dtype=float)
+        experiment_results = np.ndarray(shape=(int(steps), 4), dtype=float)
         result_index = 0
 
         for k in range(k_first, k_last + 1, step):
@@ -165,8 +165,9 @@ class Assignment2(object):
             hypothesis, empirical_errors = intervals.find_best_interval(sample[:, 0], sample[:, 1], k)
             empirical_error_rate = (empirical_errors / m)
             print("e(s) = " + str(empirical_error_rate))
-            # TODO what is the penalty?
-            penalty = self.calc_penalty(k)
+            penalty = self.calc_penalty(2 * k, m, 0.1)
+            print("penalty is = " + str(penalty))
+            print("penalty + e(s) = " + str(penalty + empirical_error_rate))
             experiment_results[result_index] = [k, empirical_error_rate, penalty, penalty + empirical_error_rate]
             print(experiment_results[result_index])
             result_index += 1
@@ -177,7 +178,7 @@ class Assignment2(object):
         plt.plot(experiment_results[:, 0], experiment_results[:, 1], color='blue')
         plt.plot(experiment_results[:, 0], experiment_results[:, 2], color='red')
         plt.plot(experiment_results[:, 0], experiment_results[:, 3], color='green')
-        plt.axis([k_first - 1, k_last + 1, 0, 10])
+        plt.axis([k_first - 1, k_last + 1, 0, 3])
         plt.show()
 
         sorted_indices = np.argsort(experiment_results[:, 3])
@@ -345,14 +346,17 @@ class Assignment2(object):
 
         return 0
 
-    def calc_penalty(self, k):
-        return -1
+    def calc_penalty(self, vcdim, n, delta):
+        return np.sqrt((32 / n) * ((vcdim * (np.log((2 * np.e * n) / vcdim))) + np.log((4 / delta))))
 
 
 if __name__ == '__main__':
     ass = Assignment2()
+    # plt.plot([1, 2, 3, 4, 5,6,7,8], [9, 7.5, 5, 3,1.4,0.8,0.4,0.3], color='blue')
+    # plt.axis([1, 9, 1, 10])
+    # plt.show()
     # ass.draw_sample_intervals(100, 3)
     # ass.experiment_m_range_erm(10, 100, 5, 3, 100)
     # ass.experiment_k_range_erm(1500, 1, 10, 1)
-    # ass.experiment_k_range_srm(1500, 1, 10, 1)
+    print("best k is : " + str(ass.experiment_k_range_srm(1500, 1, 10, 1)))
     # ass.cross_validation(1500, 3)
