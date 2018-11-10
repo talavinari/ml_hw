@@ -178,7 +178,7 @@ class Assignment2(object):
         plt.plot(experiment_results[:, 0], experiment_results[:, 1], color='blue')
         plt.plot(experiment_results[:, 0], experiment_results[:, 2], color='red')
         plt.plot(experiment_results[:, 0], experiment_results[:, 3], color='green')
-        plt.axis([k_first - 1, k_last + 1, 0, 3])
+        plt.axis([k_first - 1, k_last + 1, 0, 1.5])
         plt.show()
 
         sorted_indices = np.argsort(experiment_results[:, 3])
@@ -347,7 +347,7 @@ class Assignment2(object):
         return 0
 
     def calc_penalty(self, vcdim, n, delta):
-        return np.sqrt((32 / n) * ((vcdim * (np.log((2 * np.e * n) / vcdim))) + np.log((4 / delta))))
+        return np.sqrt((8 / n) * ((vcdim * (np.log((2 * np.e * n) / vcdim))) + np.log((4 / delta))))
 
 
 if __name__ == '__main__':
