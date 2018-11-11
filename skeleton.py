@@ -1,5 +1,6 @@
 #################################
 # Your name:
+# Tal Avinari 203097159
 #################################
 
 import numpy as np
@@ -19,8 +20,6 @@ class Assignment2(object):
         Returns: np.ndarray of shape (m,2) :
                 A two dimensional array of size m that contains the pairs where drawn from the distribution P.
         """
-        # TODO check if uniform including/excluding 1
-        # TODO check if i should add "check" for case x is exactly 2/4/6/8 and make another binomial draw
 
         sample_result = np.ndarray(shape=(m, 2), dtype=float)
         x_selection = np.random.uniform(0, 1, m)
@@ -46,18 +45,19 @@ class Assignment2(object):
         """
 
         sample_from_d = self.sample_from_D(m)
-        plt.title('Example of ' + str(m) + ' samples , and best intervals with size, k=' + str(k))
-        plt.ylabel('value')
-        plt.xlabel('x')
-        plt.plot(sample_from_d[:, 0], sample_from_d[:, 1], 'ro')
-        plt.axis([0, 1, -0.1, 1.1])
-        plt.grid(axis='x', linestyle='-')
+        # plt.title('Example of ' + str(m) + ' samples , and best intervals with size, k=' + str(k))
+        # plt.ylabel('value')
+        # plt.xlabel('x')
+        # plt.plot(sample_from_d[:, 0], sample_from_d[:, 1], 'ro')
+        # plt.axis([0, 1, -0.1, 1.1])
+        # plt.grid(axis='x', linestyle='-')
 
         erm_intervals, errors = intervals.find_best_interval(sample_from_d[:, 0], sample_from_d[:, 1], k)
         for interval in erm_intervals:
-            plt.plot([interval[0], interval[1]], [0, 0], linewidth=2)
+            pass
+            # plt.plot([interval[0], interval[1]], [0, 0], linewidth=2)
 
-        plt.show()
+        # plt.show()
 
     def experiment_m_range_erm(self, m_first, m_last, step, k, T):
         """Runs the ERM algorithm.
@@ -93,13 +93,13 @@ class Assignment2(object):
 
             # print("finished m = " + str(m))
 
-        plt.title('True error (red) & Empirical error (blue) as a function of m')
-        plt.ylabel('error')
-        plt.xlabel('m - sample size')
-        plt.plot(ms, experiment_results[:, 0], 'ro', color='blue')
-        plt.plot(ms, experiment_results[:, 1], 'ro', color='red')
-        plt.axis([m_first - 1, m_last + 1, 0, 0.6])
-        plt.show()
+        # plt.title('True error (red) & Empirical error (blue) as a function of m')
+        # plt.ylabel('error')
+        # plt.xlabel('m - sample size')
+        # plt.plot(ms, experiment_results[:, 0], 'ro', color='blue')
+        # plt.plot(ms, experiment_results[:, 1], 'ro', color='red')
+        # plt.axis([m_first - 1, m_last + 1, 0, 0.6])
+        # plt.show()
         return experiment_results
 
     def experiment_k_range_erm(self, m, k_first, k_last, step):
@@ -120,24 +120,23 @@ class Assignment2(object):
         result_index = 0
 
         for k in range(k_first, k_last + 1, step):
-            print("starting k = " + str(k) + "....")
+            # print("starting k = " + str(k) + "....")
             hypothesis, empirical_errors = intervals.find_best_interval(sample[:, 0], sample[:, 1], k)
             true_error = self.calc_true_error(hypothesis)
-            print("e(p) = " + str(true_error))
+            # print("e(p) = " + str(true_error))
             empirical_error_rate = (empirical_errors / m)
-            print("e(s) = " + str(empirical_error_rate))
+            # print("e(s) = " + str(empirical_error_rate))
             experiment_results[result_index] = [k, empirical_error_rate, true_error]
-            print(experiment_results[result_index])
+            # print(experiment_results[result_index])
             result_index += 1
-            print("####################################")
 
-        plt.title('True error (red) & Empirical error (blue) as a function of k')
-        plt.ylabel('error')
-        plt.xlabel('k - max interval size')
-        plt.plot(experiment_results[:, 0], experiment_results[:, 1], 'ro', color='blue')
-        plt.plot(experiment_results[:, 0], experiment_results[:, 2], 'ro', color='red')
-        plt.axis([k_first - 1, k_last + 1, 0, 0.7])
-        plt.show()
+        # plt.title('True error (red) & Empirical error (blue) as a function of k')
+        # plt.ylabel('error')
+        # plt.xlabel('k - max interval size')
+        # plt.plot(experiment_results[:, 0], experiment_results[:, 1], 'ro', color='blue')
+        # plt.plot(experiment_results[:, 0], experiment_results[:, 2], 'ro', color='red')
+        # plt.axis([k_first - 1, k_last + 1, 0, 0.7])
+        # plt.show()
 
         sorted_indices = np.argsort(experiment_results[:, 2])
         lowest_true_error_index = sorted_indices[0]
@@ -161,25 +160,25 @@ class Assignment2(object):
         result_index = 0
 
         for k in range(k_first, k_last + 1, step):
-            print("starting k = " + str(k) + "....")
+            # print("starting k = " + str(k) + "....")
             hypothesis, empirical_errors = intervals.find_best_interval(sample[:, 0], sample[:, 1], k)
             empirical_error_rate = (empirical_errors / m)
-            print("e(s) = " + str(empirical_error_rate))
+            # print("e(s) = " + str(empirical_error_rate))
             penalty = self.calc_penalty(2 * k, m, 0.1)
-            print("penalty is = " + str(penalty))
-            print("penalty + e(s) = " + str(penalty + empirical_error_rate))
+            # print("penalty is = " + str(penalty))
+            # print("penalty + e(s) = " + str(penalty + empirical_error_rate))
             experiment_results[result_index] = [k, empirical_error_rate, penalty, penalty + empirical_error_rate]
-            print(experiment_results[result_index])
+            # print(experiment_results[result_index])
             result_index += 1
 
-        plt.title('Empirical error (blue), penalty (red), e(s) + penalty (green) as a function of k')
-        plt.ylabel('error')
-        plt.xlabel('k - max interval size')
-        plt.plot(experiment_results[:, 0], experiment_results[:, 1], color='blue')
-        plt.plot(experiment_results[:, 0], experiment_results[:, 2], color='red')
-        plt.plot(experiment_results[:, 0], experiment_results[:, 3], color='green')
-        plt.axis([k_first - 1, k_last + 1, 0, 1.5])
-        plt.show()
+        # plt.title('Empirical error (blue), penalty (red), e(s) + penalty (green) as a function of k')
+        # plt.ylabel('error')
+        # plt.xlabel('k - max interval size')
+        # plt.plot(experiment_results[:, 0], experiment_results[:, 1], color='blue')
+        # plt.plot(experiment_results[:, 0], experiment_results[:, 2], color='red')
+        # plt.plot(experiment_results[:, 0], experiment_results[:, 3], color='green')
+        # plt.axis([k_first - 1, k_last + 1, 0, 1.5])
+        # plt.show()
 
         sorted_indices = np.argsort(experiment_results[:, 3])
         lowest_penalty_with_empirical_error = sorted_indices[0]
@@ -199,7 +198,7 @@ class Assignment2(object):
         for k in range(1, 11):
             ks.append(k)
             total_errors = 0
-            print("running with k=" + str(k))
+            # print("running with k=" + str(k))
             holdout_size = 0
             for t in range(0, T):
                 train_sample, holdout_samples = self.split_sample_for_cross(sample, t)
@@ -210,15 +209,15 @@ class Assignment2(object):
                         total_errors += 1
 
             holdout_error = (total_errors / T) / holdout_size
-            print("AVG errors after 3 runs is : " + str(holdout_error))
+            # print("AVG errors after 3 runs is : " + str(holdout_error))
             experiment_results.append(holdout_error)
 
-        plt.title('Avg e(hold_out) as a function of best h in k size interval')
-        plt.ylabel('avg e(hold_out)')
-        plt.xlabel('ERM result of max k intervals hypothesis class')
-        plt.plot(ks, experiment_results, 'ro', color='blue')
-        plt.axis([0, 11, 0, 1])
-        plt.show()
+        # plt.title('Avg e(hold_out) as a function of best h in k size interval')
+        # plt.ylabel('avg e(hold_out)')
+        # plt.xlabel('ERM result of max k intervals hypothesis class')
+        # plt.plot(ks, experiment_results, 'ro', color='blue')
+        # plt.axis([0, 11, 0, 1])
+        # plt.show()
 
         return np.argmin(experiment_results) + 1
 
@@ -236,7 +235,7 @@ class Assignment2(object):
         elif interval[0] >= 0.8 and interval[1] <= 1:
             return 0.8
         else:
-            print("error, invalid interval")
+            # print("error, invalid interval")
             return None
 
     def is_in_one_section(self, interval):
@@ -352,11 +351,8 @@ class Assignment2(object):
 
 if __name__ == '__main__':
     ass = Assignment2()
-    # plt.plot([1, 2, 3, 4, 5,6,7,8], [9, 7.5, 5, 3,1.4,0.8,0.4,0.3], color='blue')
-    # plt.axis([1, 9, 1, 10])
-    # plt.show()
-    # ass.draw_sample_intervals(100, 3)
-    # ass.experiment_m_range_erm(10, 100, 5, 3, 100)
-    # ass.experiment_k_range_erm(1500, 1, 10, 1)
-    print("best k is : " + str(ass.experiment_k_range_srm(1500, 1, 10, 1)))
-    # ass.cross_validation(1500, 3)
+    ass.draw_sample_intervals(100, 3)
+    ass.experiment_m_range_erm(10, 100, 5, 3, 100)
+    ass.experiment_k_range_erm(1500, 1, 10, 1)
+    ass.experiment_k_range_srm(1500, 1, 10, 1)
+    ass.cross_validation(1500, 3)
