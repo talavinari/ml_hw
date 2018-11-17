@@ -8,7 +8,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 import sgd
 from sklearn.preprocessing import normalize
-from sklearn.utils import shuffle
 
 """
 Assignment 3 question 1 skeleton.
