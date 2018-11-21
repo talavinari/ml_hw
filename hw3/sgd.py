@@ -93,29 +93,27 @@ def calc_accuracy(test_data, test_labels, w):
 def exc_a():
     avg_accuracies, log_search = calc_parameter(N_TYPE, 1)
 
-    plt.title('Average accuracy on the validation set, as a function of n0')
-    plt.ylabel('average accuracy')
-    plt.xlabel('log10(n0)')
-    plt.plot(log_search, avg_accuracies, color='blue')
-    plt.axis([log_search[0], log_search[len(log_search) - 1], 0.45, 1])
-    plt.grid(axis='x', linestyle='-')
-    plt.grid(axis='y', linestyle='-')
-    plt.show()
+    # plt.title('Average accuracy on the validation set, as a function of n0')
+    # plt.ylabel('average accuracy')
+    # plt.xlabel('log10(n0)')
+    # plt.plot(log_search, avg_accuracies, color='blue')
+    # plt.axis([log_search[0], log_search[len(log_search) - 1], 0.45, 1])
+    # plt.grid(axis='x', linestyle='-')
+    # plt.grid(axis='y', linestyle='-')
+    # plt.show()
 
 
 def exc_b():
     avg_accuracies, log_search = calc_parameter(C_TYPE, 1)
 
-    plt.title('Average accuracy on the validation set, as a function of C')
-    plt.ylabel('average accuracy')
-    plt.xlabel('log10(C)')
-    plt.plot(log_search, avg_accuracies, color='blue')
-    plt.axis([log_search[0], log_search[len(log_search) - 1], 0.45, 1])
-    plt.grid(axis='x', linestyle='-')
-    plt.grid(axis='y', linestyle='-')
-    plt.show()
-
-    print(max(avg_accuracies))
+    # plt.title('Average accuracy on the validation set, as a function of C')
+    # plt.ylabel('average accuracy')
+    # plt.xlabel('log10(C)')
+    # plt.plot(log_search, avg_accuracies, color='blue')
+    # plt.axis([log_search[0], log_search[len(log_search) - 1], 0.95, 1])
+    # plt.grid(axis='x', linestyle='-')
+    # plt.grid(axis='y', linestyle='-')
+    # plt.show()
 
 
 def calc_parameter(param_type, second_as_const):
@@ -135,7 +133,7 @@ def calc_parameter(param_type, second_as_const):
 
         avg_accuracy = total_accuracy / experiment_times
         avg_accuracies.append(avg_accuracy)
-        print("accuracy for 10^" + str(log) + " is :" + str(avg_accuracy))
+        # print("accuracy for 10^" + str(log) + " is :" + str(avg_accuracy))
     return avg_accuracies, log_search
 
 
@@ -144,8 +142,8 @@ def exc_c_d():
     classifier = SGD(train_data, train_labels, pow(10, -4), 1, 20000)
     accuracy = calc_accuracy(test_data, test_labels, classifier)
     print("accuracy for c=10^-4 and n0=1 is : " + str(accuracy))
-    plt.imshow(np.reshape(classifier, (28, 28)), interpolation='nearest')
-    plt.show()
+    # plt.imshow(np.reshape(classifier, (28, 28)), interpolation='nearest')
+    # plt.show()
 
 
 if __name__ == '__main__':
