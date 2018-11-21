@@ -8,6 +8,10 @@ import numpy as np
 import numpy.random
 from sklearn.datasets import fetch_mldata
 import sklearn.preprocessing
+import matplotlib.pyplot as plt
+
+C_TYPE = 'C'
+N_TYPE = 'N'
 
 """
 Assignment 3 question 2 skeleton.
@@ -50,14 +54,15 @@ def SGD(data, labels, C, eta_0, T):
 
     w = np.zeros(shape=(len(data[0])), dtype=float)
 
-    for t in range(T):
+    for t in range(1, T + 1):
+        nt = eta_0 / t
         i = np.random.randint(len(data))
         yi = labels[i]
         xi = data[i]
         if yi * np.dot(w, xi) < 1:
-            w = np.add(np.dot(w, 1 - eta_0), np.dot(xi, eta_0 * yi * C))
+            w = np.add(np.dot(1 - nt, w), np.dot(nt * C * yi, xi))
         else:
-            w = np.dot(w, 1 - eta_0)
+            w = np.dot(1 - nt, w)
 
     return w
 
@@ -85,20 +90,66 @@ def calc_accuracy(test_data, test_labels, w):
     return (test_size - mistake) / test_size
 
 
-if __name__ == '__main__':
-    np.set_printoptions(suppress=True)
-    train_data, train_labels, validation_data, validation_labels, test_data, test_labels = helper()
+def exc_a():
+    avg_accuracies, log_search = calc_parameter(N_TYPE, 1)
 
-    # log_search = [-5]
+    plt.title('Average accuracy on the validation set, as a function of n0')
+    plt.ylabel('average accuracy')
+    plt.xlabel('log10(n0)')
+    plt.plot(log_search, avg_accuracies, color='blue')
+    plt.axis([log_search[0], log_search[len(log_search) - 1], 0.45, 1])
+    plt.grid(axis='x', linestyle='-')
+    plt.grid(axis='y', linestyle='-')
+    plt.show()
+
+
+def exc_b():
+    avg_accuracies, log_search = calc_parameter(C_TYPE, 1)
+
+    plt.title('Average accuracy on the validation set, as a function of C')
+    plt.ylabel('average accuracy')
+    plt.xlabel('log10(C)')
+    plt.plot(log_search, avg_accuracies, color='blue')
+    plt.axis([log_search[0], log_search[len(log_search) - 1], 0.45, 1])
+    plt.grid(axis='x', linestyle='-')
+    plt.grid(axis='y', linestyle='-')
+    plt.show()
+
+    print(max(avg_accuracies))
+
+
+def calc_parameter(param_type, second_as_const):
+    train_data, train_labels, validation_data, validation_labels, test_data, test_labels = helper()
     log_search = [-5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5]
     experiment_times = 10
-
+    avg_accuracies = []
     for log in log_search:
         total_accuracy = 0
         for t in range(experiment_times):
-            classifier = SGD(train_data, train_labels, 1, pow(10, log), 1000)
+            if param_type == N_TYPE:
+                classifier = SGD(train_data, train_labels, second_as_const, pow(10, log), 1000)
+            else:
+                classifier = SGD(train_data, train_labels, pow(10, log), second_as_const, 1000)
             accuracy = calc_accuracy(validation_data, validation_labels, classifier)
             total_accuracy += accuracy
 
         avg_accuracy = total_accuracy / experiment_times
-        print("accuracy for  10^" + str(log) + " is: " + str(avg_accuracy))
+        avg_accuracies.append(avg_accuracy)
+        print("accuracy for 10^" + str(log) + " is :" + str(avg_accuracy))
+    return avg_accuracies, log_search
+
+
+def exc_c_d():
+    train_data, train_labels, validation_data, validation_labels, test_data, test_labels = helper()
+    classifier = SGD(train_data, train_labels, pow(10, -4), 1, 20000)
+    accuracy = calc_accuracy(test_data, test_labels, classifier)
+    print("accuracy for c=10^-4 and n0=1 is : " + str(accuracy))
+    plt.imshow(np.reshape(classifier, (28, 28)), interpolation='nearest')
+    plt.show()
+
+
+if __name__ == '__main__':
+    np.set_printoptions(suppress=True)
+    exc_a()
+    exc_b()
+    exc_c_d()
