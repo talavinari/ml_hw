@@ -1,5 +1,5 @@
 #################################
-# Your name:
+# Your name: Tal Avinari
 #################################
 
 # Please import and use stuff only from the packages numpy, sklearn, matplotlib
@@ -21,7 +21,6 @@ def perceptron(data, labels):
     """
 	returns: nd array of shape (data.shape[1],) or (data.shape[1],1) representing the perceptron classifier
     """
-    #TODO check if the zeros is same as nd array of shape 1
     w = np.zeros(shape=(len(data[0])), dtype=float)
 
     for index, xt in enumerate(data):
@@ -111,7 +110,7 @@ def exc_b_c_d():
     normalized_train_data = normalize_train_date(train_data)
     w = perceptron(normalized_train_data, train_labels)
     accuracy = calc_accuracy(test_data, test_labels, w)
-    print("accuracy of the classifier trained on the full training set applied on the test set " + str(accuracy))
+    # print("accuracy of the classifier trained on the full training set applied on the test set " + str(accuracy))
 
     # plt.imshow(np.reshape(w, (28, 28)), interpolation='nearest')
     # plt.show()
@@ -125,12 +124,3 @@ if __name__ == '__main__':
     np.set_printoptions(suppress=True)
     exc_a()
     exc_b_c_d()
-
-    # print("train data len is " + str(len(train_data)))
-    # print("validation data len is " + str(len(validation_data)))
-    # print("test data len is " + str(len(test_data)))
-    #
-    # print("vector size is " + str(len(train_data[0])))
-    # print("labels are:" + str(validation_labels))
-    # print(max(validation_labels))
-    # print(min(validation_labels))

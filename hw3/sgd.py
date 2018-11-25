@@ -1,5 +1,5 @@
 #################################
-# Your name:
+# Your name: Tal Avinari
 #################################
 
 # Please import and use stuff only from the packages numpy, sklearn, matplotlib
@@ -141,7 +141,7 @@ def exc_c_d():
     train_data, train_labels, validation_data, validation_labels, test_data, test_labels = helper()
     classifier = SGD(train_data, train_labels, pow(10, -4), 1, 20000)
     accuracy = calc_accuracy(test_data, test_labels, classifier)
-    print("accuracy for c=10^-4 and n0=1 is : " + str(accuracy))
+    # print("accuracy for c=10^-4 and n0=1 is : " + str(accuracy))
     # plt.imshow(np.reshape(classifier, (28, 28)), interpolation='nearest')
     # plt.show()
 
