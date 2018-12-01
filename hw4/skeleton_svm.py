@@ -51,16 +51,25 @@ def train_three_kernels(X_train, y_train, X_val, y_val):
                 A two dimensional array of size 3 that contains the number of support vectors for each class(2) in the three kernels.
     """
 
-    clf = svm.SVC(gamma='scale')
+    clf = svm.SVC(C=1000.0, decision_function_shape='ovr', kernel='linear')
     clf.fit(X_train, y_train)
-    svm.SVC(C=1.0, cache_size=200, class_weight=None, coef0=0.0,
-        decision_function_shape='ovr', degree=3, gamma='scale', kernel='rbf',
-        max_iter=-1, probability=False, random_state=None, shrinking=True,
-        tol=0.001, verbose=False)
 
-    predict = clf.predict(X_val)
-    print(predict)
-    print(y_val)
+    create_plot(X_train, y_train, clf)
+    plt.show()
+
+    clf = svm.SVC(C=1000.0, decision_function_shape='ovr', kernel='rbf')
+    clf.fit(X_train, y_train)
+
+    create_plot(X_train, y_train, clf)
+    plt.show()
+
+    clf = svm.SVC(C=1000.0, decision_function_shape='ovr', kernel='poly', degree=2)
+    clf.fit(X_train, y_train)
+
+    create_plot(X_train, y_train, clf)
+    plt.show()
+
+
 
 
 def linear_accuracy_per_C(X_train, y_train, X_val, y_val):
