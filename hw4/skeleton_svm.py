@@ -15,6 +15,7 @@ Please use the provided functions signature for the SVM implementation.
 Feel free to add functions and other code, and submit this file with the name svm.py
 """
 
+
 # generate points in 2D
 # return training_data, training_labels, validation_data, validation_labels
 def get_points():
@@ -70,14 +71,24 @@ def train_three_kernels(X_train, y_train, X_val, y_val):
     plt.show()
 
 
-
-
 def linear_accuracy_per_C(X_train, y_train, X_val, y_val):
     """
         Returns: np.ndarray of shape (11,) :
                     An array that contains the accuracy of the resulting model on the VALIDATION set.
     """
-    # TODO: add your code here
+    validation_size = len(X_val)
+
+    log_search = [-5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5]
+
+    for log in log_search:
+        current_c = pow(10, log)
+        clf = svm.SVC(C=current_c, decision_function_shape='ovr', kernel='linear')
+        clf.fit(X_train, y_train)
+        predict = clf.predict(X_val)
+        correct_classifications = np.count_nonzero(predict == y_val)
+        print("accuracy for c=" + str(current_c) + " is :" + str(correct_classifications / validation_size))
+        create_plot(X_train, y_train, clf)
+        plt.show()
 
 
 def rbf_accuracy_per_gamma(X_train, y_train, X_val, y_val):
@@ -85,15 +96,22 @@ def rbf_accuracy_per_gamma(X_train, y_train, X_val, y_val):
         Returns: np.ndarray of shape (11,) :
                     An array that contains the accuracy of the resulting model on the VALIDATION set.
     """
-    # TODO: add your code here
+    validation_size = len(X_val)
+
+    log_search = [-5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5]
+
+    for log in log_search:
+        gamma = pow(10, log)
+        clf = svm.SVC(C=10, decision_function_shape='ovr', kernel='rbf', gamma=gamma)
+        clf.fit(X_train, y_train)
+        predict = clf.predict(X_val)
+        correct_classifications = np.count_nonzero(predict == y_val)
+        print("accuracy for gamma=" + str(gamma) + " is :" + str(correct_classifications / validation_size))
+        create_plot(X_train, y_train, clf)
+        plt.show()
 
 if __name__ == '__main__':
     training_data, training_labels, validation_data, validation_labels = get_points()
-    # print(training_data)
-    # print(training_labels)
-    # print(validation_data)
-    # print(validation_labels)
     train_three_kernels(training_data, training_labels, validation_data, validation_labels)
-
-
-
+    # linear_accuracy_per_C(training_data, training_labels, validation_data, validation_labels)
+    # rbf_accuracy_per_gamma(training_data, training_labels, validation_data, validation_labels)
