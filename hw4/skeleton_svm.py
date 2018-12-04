@@ -112,6 +112,6 @@ def rbf_accuracy_per_gamma(X_train, y_train, X_val, y_val):
 
 if __name__ == '__main__':
     training_data, training_labels, validation_data, validation_labels = get_points()
-    train_three_kernels(training_data, training_labels, validation_data, validation_labels)
-    # linear_accuracy_per_C(training_data, training_labels, validation_data, validation_labels)
+    # train_three_kernels(training_data, training_labels, validation_data, validation_labels)
+    linear_accuracy_per_C(training_data, training_labels, validation_data, validation_labels)
     # rbf_accuracy_per_gamma(training_data, training_labels, validation_data, validation_labels)
