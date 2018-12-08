@@ -60,8 +60,10 @@ class KerasMnist(object):
         ### YOUR CODE STARTS HERE
 
         self.model = Sequential()
+        input_dim = self.input_dim
         for layer in self.hidden_layer_dims:
-            self.model.add(Dense(units=layer, activation='relu', input_dim=self.input_dim))
+            self.model.add(Dense(units=layer, activation='relu', input_dim=input_dim))
+            input_dim = layer
         self.model.add(Dense(units=self.num_classes, activation='softmax'))
 
         ### YOUR CODE ENDS HERE
