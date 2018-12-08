@@ -57,22 +57,22 @@ def train_three_kernels(X_train, y_train, X_val, y_val):
     clf.fit(X_train, y_train)
     results[0] = clf.n_support_
 
-    create_plot(X_train, y_train, clf)
-    plt.show()
+    # create_plot(X_train, y_train, clf)
+    # plt.show()
 
     clf = svm.SVC(C=1000.0, decision_function_shape='ovr', kernel='poly', degree=2)
     clf.fit(X_train, y_train)
     results[1] = clf.n_support_
 
-    create_plot(X_train, y_train, clf)
-    plt.show()
+    # create_plot(X_train, y_train, clf)
+    # plt.show()
 
     clf = svm.SVC(C=1000.0, decision_function_shape='ovr', kernel='rbf')
     clf.fit(X_train, y_train)
     results[2] = clf.n_support_
 
-    create_plot(X_train, y_train, clf)
-    plt.show()
+    # create_plot(X_train, y_train, clf)
+    # plt.show()
 
     return results
 
@@ -83,18 +83,33 @@ def linear_accuracy_per_C(X_train, y_train, X_val, y_val):
                     An array that contains the accuracy of the resulting model on the VALIDATION set.
     """
     validation_size = len(X_val)
+    results = np.ndarray(shape=(11,), dtype=float)
 
     log_search = [-5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5]
-
-    for log in log_search:
+    for index, log in enumerate(log_search):
         current_c = pow(10, log)
         clf = svm.SVC(C=current_c, decision_function_shape='ovr', kernel='linear')
         clf.fit(X_train, y_train)
         predict = clf.predict(X_val)
         correct_classifications = np.count_nonzero(predict == y_val)
-        print("accuracy for c=" + str(current_c) + " is :" + str(correct_classifications / validation_size))
-        create_plot(X_train, y_train, clf)
-        plt.show()
+        accuracy = correct_classifications / validation_size
+        results[index] = accuracy
+
+        # print("accuracy for c=" + str(current_c) + " is :" + str(accuracy))
+        # if current_c == 100:
+        #     create_plot(X_train, y_train, clf)
+        #     plt.show()
+
+    # plt.title('Accuracy on the validation set, as a function of C')
+    # plt.ylabel('Accuracy')
+    # plt.xlabel('log10(C)')
+    # plt.plot(log_search, results, color='blue')
+    # plt.axis([log_search[0], log_search[len(log_search) - 1], 0.3, 1.1])
+    # plt.grid(axis='x', linestyle='-')
+    # plt.grid(axis='y', linestyle='-')
+    # plt.show()
+
+    return results
 
 
 def rbf_accuracy_per_gamma(X_train, y_train, X_val, y_val):
@@ -103,21 +118,36 @@ def rbf_accuracy_per_gamma(X_train, y_train, X_val, y_val):
                     An array that contains the accuracy of the resulting model on the VALIDATION set.
     """
     validation_size = len(X_val)
+    results = np.ndarray(shape=(11,), dtype=float)
 
     log_search = [-5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5]
-
-    for log in log_search:
+    for index, log in enumerate(log_search):
         gamma = pow(10, log)
         clf = svm.SVC(C=10, decision_function_shape='ovr', kernel='rbf', gamma=gamma)
         clf.fit(X_train, y_train)
         predict = clf.predict(X_val)
         correct_classifications = np.count_nonzero(predict == y_val)
-        print("accuracy for gamma=" + str(gamma) + " is :" + str(correct_classifications / validation_size))
-        create_plot(X_train, y_train, clf)
-        plt.show()
+        accuracy = correct_classifications / validation_size
+        results[index] = accuracy
+        # print("accuracy for gamma=" + str(gamma) + " is :" + str(accuracy))
+        # if gamma == 10:
+        #     create_plot(X_train, y_train, clf)
+        #     plt.show()
+
+    # plt.title('RBF accuracy on the validation set, as a function of gamma')
+    # plt.ylabel('RBF accuracy')
+    # plt.xlabel('log10(gamma)')
+    # plt.plot(log_search, results, color='blue')
+    # plt.axis([log_search[0], log_search[len(log_search) - 1], 0.3, 1.1])
+    # plt.grid(axis='x', linestyle='-')
+    # plt.grid(axis='y', linestyle='-')
+    # plt.show()
+
+    return results
+
 
 if __name__ == '__main__':
     training_data, training_labels, validation_data, validation_labels = get_points()
     train_three_kernels(training_data, training_labels, validation_data, validation_labels)
-    # linear_accuracy_per_C(training_data, training_labels, validation_data, validation_labels)
-    # rbf_accuracy_per_gamma(training_data, training_labels, validation_data, validation_labels)
+    linear_accuracy_per_C(training_data, training_labels, validation_data, validation_labels)
+    rbf_accuracy_per_gamma(training_data, training_labels, validation_data, validation_labels)
