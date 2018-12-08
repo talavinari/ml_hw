@@ -51,24 +51,30 @@ def train_three_kernels(X_train, y_train, X_val, y_val):
     Returns: np.ndarray of shape (3,2) :
                 A two dimensional array of size 3 that contains the number of support vectors for each class(2) in the three kernels.
     """
+    results = np.ndarray(shape=(3, 2), dtype=float)
 
     clf = svm.SVC(C=1000.0, decision_function_shape='ovr', kernel='linear')
     clf.fit(X_train, y_train)
-
-    create_plot(X_train, y_train, clf)
-    plt.show()
-
-    clf = svm.SVC(C=1000.0, decision_function_shape='ovr', kernel='rbf')
-    clf.fit(X_train, y_train)
+    results[0] = clf.n_support_
 
     create_plot(X_train, y_train, clf)
     plt.show()
 
     clf = svm.SVC(C=1000.0, decision_function_shape='ovr', kernel='poly', degree=2)
     clf.fit(X_train, y_train)
+    results[1] = clf.n_support_
 
     create_plot(X_train, y_train, clf)
     plt.show()
+
+    clf = svm.SVC(C=1000.0, decision_function_shape='ovr', kernel='rbf')
+    clf.fit(X_train, y_train)
+    results[2] = clf.n_support_
+
+    create_plot(X_train, y_train, clf)
+    plt.show()
+
+    return results
 
 
 def linear_accuracy_per_C(X_train, y_train, X_val, y_val):
@@ -112,6 +118,6 @@ def rbf_accuracy_per_gamma(X_train, y_train, X_val, y_val):
 
 if __name__ == '__main__':
     training_data, training_labels, validation_data, validation_labels = get_points()
-    # train_three_kernels(training_data, training_labels, validation_data, validation_labels)
-    linear_accuracy_per_C(training_data, training_labels, validation_data, validation_labels)
+    train_three_kernels(training_data, training_labels, validation_data, validation_labels)
+    # linear_accuracy_per_C(training_data, training_labels, validation_data, validation_labels)
     # rbf_accuracy_per_gamma(training_data, training_labels, validation_data, validation_labels)
