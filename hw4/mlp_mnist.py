@@ -57,7 +57,6 @@ class KerasMnist(object):
         as a Sequential model and add layers to it according to
         the class variables input_dim, hidden_layer_dims and num_classes.
         '''
-        ### YOUR CODE STARTS HERE
 
         self.model = Sequential()
         input_dim = self.input_dim
@@ -65,8 +64,6 @@ class KerasMnist(object):
             self.model.add(Dense(units=layer, activation='relu', input_dim=input_dim))
             input_dim = layer
         self.model.add(Dense(units=self.num_classes, activation='softmax'))
-
-        ### YOUR CODE ENDS HERE
 
         self.model.compile(loss='categorical_crossentropy',
                            optimizer=SGD(),
@@ -84,9 +81,22 @@ class KerasMnist(object):
          1) Define the variable x as the input to the network.
          2) Define the variable out as the output of the network.
         '''
-        ### YOUR CODE STARTS HERE
 
-        ### YOUR CODE ENDS HERE
+        x = Input(shape=(self.input_dim,))
+        prev = x
+        tensors = [x]
+        for index, layer in enumerate(self.hidden_layer_dims):
+            if index >= self.skips and index % self.skips == 0:
+                hidden_layer = Dense(units=layer, activation='relu')(prev)
+                n_skip_back_layer = tensors[index - self.skips + 1]
+                prev = keras.layers.add([hidden_layer, n_skip_back_layer])
+
+            else:
+                hidden_layer = Dense(units=layer, activation='relu')(prev)
+                prev = hidden_layer
+            tensors.append(prev)
+
+        out = Dense(units=self.num_classes, activation='softmax')(prev)
 
         self.model = Model([x], out)
         self.model.compile(loss='categorical_crossentropy',
