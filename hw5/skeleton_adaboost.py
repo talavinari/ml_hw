@@ -169,7 +169,7 @@ def main():
     plt.xlabel('T')
     plt.plot(experiment_results[:, 0], experiment_results[:, 3], color='blue')
     plt.plot(experiment_results[:, 0], experiment_results[:, 4], color='red')
-    plt.axis([0, T, 0, 1])
+    plt.axis([0, T, 0.6, 1])
     plt.show()
 
     print("train error:")
