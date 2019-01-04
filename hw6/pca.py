@@ -1,11 +1,10 @@
-import matplotlib
-
 # matplotlib.use('TkAgg')
-import os, ssl
+import os
+import ssl
 
 import matplotlib.pyplot as plt
-from sklearn.datasets import fetch_lfw_people
 import numpy as np
+from sklearn.datasets import fetch_lfw_people
 
 
 def plot_vector_as_image(image, h, w):
@@ -19,6 +18,30 @@ def plot_vector_as_image(image, h, w):
     image - vector of pixels
     h, w - dimesnions of original pi
     """
+
+
+def get_pictures_with_limit_number(threshold=70):
+    """
+    Given a name returns all the pictures of the person with this specific name.
+    YOU CAN CHANGE THIS FUNCTION!
+    THIS IS JUST AN EXAMPLE, FEEL FREE TO CHANGE IT!
+    """
+    lfw_people = load_data()
+    selected_images = []
+    n_samples, h, w = lfw_people.images.shape
+    unique, counts = np.unique(lfw_people.target, return_counts=True)
+    pic_dict = dict(zip(unique, counts))
+    # print(pic_dict)
+    all_relevant_targets = [k for k, v in pic_dict.items() if v >= threshold]
+    # print(all_relevant_targets)
+
+    for image, target in zip(lfw_people.images, lfw_people.target):
+        if target in all_relevant_targets:
+            image_vector = image.reshape((h * w, 1))
+            selected_images.append(image_vector)
+        else:
+            print("warn")
+    return selected_images, h, w
 
 
 def get_pictures_by_name(name='Ariel Sharon'):
@@ -70,26 +93,36 @@ def PCA(X, k):
     return U, S
 
 
+def exc_d():
+    get_pictures_with_limit_number()
+
+
 def main():
     names = ['Ariel Sharon', 'Colin Powell', 'Donald Rumsfeld', 'George W Bush',
              'Gerhard Schroeder', 'Hugo Chavez', 'Tony Blair']
 
     chosen_name = names[0]
-    selected_images, h, w = get_pictures_by_name(chosen_name)
-    print("selected images number of " + chosen_name + " is: " + str(len(selected_images)))
+    # selected_images, h, w = get_pictures_by_name(chosen_name)
+    # print("selected images number of " + chosen_name + " is: " + str(len(selected_images)))
+    #
+    # new_pics = normalize_to_zero_mean(selected_images)
 
+    # exc_b(chosen_name)
+    exc_c(chosen_name)
+    # exc_d()
+
+
+def normalize_to_zero_mean(selected_images):
     selected_images = np.array(selected_images).reshape(len(selected_images), len(selected_images[0]))
     mean_vector = np.mean(selected_images, axis=0)
-    new_pics = selected_images - mean_vector
-
-    # print(eigen_vectors.shape, s.shape)
-
-    # exc_b(new_pics, h, w)
-
-    exc_c(h, new_pics, w)
+    return selected_images - mean_vector
 
 
-def exc_c(h, new_pics, w):
+def exc_c(chosen_name):
+    selected_images, h, w = get_pictures_by_name(chosen_name)
+    # print("selected images number of " + chosen_name + " is: " + str(len(selected_images)))
+    new_pics = normalize_to_zero_mean(selected_images)
+
     ks = [1, 5, 10, 30, 50, 100]
     l2_sums = np.ndarray(shape=(6, 2), dtype=float)
 
@@ -115,25 +148,28 @@ def exc_c(h, new_pics, w):
             # axarr[0, 1].set_title("reduced ")
 
             dist_sum += np.linalg.norm(reshped_original[i] - reshped_transformed[i])
-        l2_sums[index] = [index, dist_sum]
+        l2_sums[index] = [k, dist_sum]
 
     # plt.show()
 
     print(l2_sums)
 
-
     # plt.title('Sum of L2 distances between 5 image pairs as function of K')
     # plt.ylabel('Sum of L2')
-    # plt.xlabel('K 1, 5, 10, 30, 50, 100')
+    # plt.xlabel('K tested = 1, 5, 10, 30, 50, 100')
     # plt.plot(l2_sums[:, 0], l2_sums[:, 1], color='blue')
-    # plt.axis([0, len(ks) - 1, 0, 6500])
+    # plt.axis([0, 100, 0, 6500])
     # plt.grid(axis='x', linestyle='-')
     # plt.grid(axis='y', linestyle='-')
     # plt.show()
 
 
-def exc_b(new_pics, h, w):
+def exc_b(chosen_name):
+    selected_images, h, w = get_pictures_by_name(chosen_name)
+    # print("selected images number of " + chosen_name + " is: " + str(len(selected_images)))
+    new_pics = normalize_to_zero_mean(selected_images)
     eigen_vectors, s = PCA(new_pics, 10)
+
     images = [u.reshape(h, w) for u in eigen_vectors]
     figure, axarr = plt.subplots(2, 5)
     figure.suptitle("First 10 eigen-vectors as images", fontsize=16)
