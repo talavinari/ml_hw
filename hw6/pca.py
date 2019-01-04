@@ -1,9 +1,14 @@
+#################################
+# Your name: Tal Avinari
+#################################
+
 # matplotlib.use('TkAgg')
 import os
 import ssl
 
 import matplotlib.pyplot as plt
 import numpy as np
+from sklearn import svm
 from sklearn.datasets import fetch_lfw_people
 
 
@@ -28,6 +33,7 @@ def get_pictures_with_limit_number(threshold=70):
     """
     lfw_people = load_data()
     selected_images = []
+    labels = []
     n_samples, h, w = lfw_people.images.shape
     unique, counts = np.unique(lfw_people.target, return_counts=True)
     pic_dict = dict(zip(unique, counts))
@@ -39,9 +45,8 @@ def get_pictures_with_limit_number(threshold=70):
         if target in all_relevant_targets:
             image_vector = image.reshape((h * w, 1))
             selected_images.append(image_vector)
-        else:
-            print("warn")
-    return selected_images, h, w
+            labels.append(target)
+    return selected_images, labels, h, w
 
 
 def get_pictures_by_name(name='Ariel Sharon'):
@@ -94,22 +99,55 @@ def PCA(X, k):
 
 
 def exc_d():
-    get_pictures_with_limit_number()
+    selected_images, labels, h, w = get_pictures_with_limit_number()
+    mean_zero_pics = normalize_to_zero_mean(selected_images)
+    ks = [1, 5, 10, 30, 50, 100, 150, 300, len(mean_zero_pics[0])]
+    results = np.ndarray(shape=(len(ks), 2), dtype=float)
+
+    for index, k in enumerate(ks):
+        V = find_V_for_reduce_dim(mean_zero_pics, k)
+        reduced_images = [transform_to_V(V, img) for img in mean_zero_pics]
+        x_train, y_train, x_val, y_val = split_train_validation(reduced_images, labels)
+        validation_size = len(x_val)
+
+        clf = svm.SVC(C=1000.0, decision_function_shape='ovr', kernel='rbf', gamma=pow(10, -7))
+        clf.fit(x_train, y_train)
+        predict = clf.predict(x_val)
+        correct_classifications = np.count_nonzero(predict == y_val)
+        accuracy = correct_classifications / validation_size
+        results[index] = [k, accuracy]
+        # print("accuracy for dim " + str(k) + " is : " + str(accuracy))
+
+    # plt.title('Accuracy on the test set a function of K')
+    # plt.ylabel('Accuracy ')
+    # plt.xlabel('K')
+    # plt.plot(results[:, 0], results[:, 1], color='blue')
+    # plt.axis([0, len(mean_zero_pics[0]), 0, 1])
+    # plt.grid(axis='x', linestyle='-')
+    # plt.grid(axis='y', linestyle='-')
+    # plt.show()
 
 
-def main():
-    names = ['Ariel Sharon', 'Colin Powell', 'Donald Rumsfeld', 'George W Bush',
-             'Gerhard Schroeder', 'Hugo Chavez', 'Tony Blair']
+def split_train_validation(images, labels):
+    train_size = int(len(images) * 0.75)
+    x_train, y_train, x_val, y_val = images[:train_size], labels[:train_size], images[
+                                                                               train_size:], labels[
+                                                                                             train_size:]
 
-    chosen_name = names[0]
-    # selected_images, h, w = get_pictures_by_name(chosen_name)
-    # print("selected images number of " + chosen_name + " is: " + str(len(selected_images)))
-    #
-    # new_pics = normalize_to_zero_mean(selected_images)
+    return x_train, y_train, x_val, y_val
 
-    # exc_b(chosen_name)
-    exc_c(chosen_name)
-    # exc_d()
+
+def find_V_for_reduce_dim(origin_data, target_dim):
+    eigen_vectors, s = PCA(origin_data, target_dim)
+    V = np.transpose(eigen_vectors)
+    Vt = eigen_vectors
+    # return V, Vt
+    return V
+
+
+def transform_to_V(V, x):
+    Vt = np.transpose(V)
+    return np.dot(np.dot(V, Vt), x)
 
 
 def normalize_to_zero_mean(selected_images):
@@ -152,7 +190,7 @@ def exc_c(chosen_name):
 
     # plt.show()
 
-    print(l2_sums)
+    # print(l2_sums)
 
     # plt.title('Sum of L2 distances between 5 image pairs as function of K')
     # plt.ylabel('Sum of L2')
@@ -179,7 +217,18 @@ def exc_b(chosen_name):
     for i in range(5, 10):
         axarr[1, i % 5].imshow(images[i].reshape((h, w)), cmap=plt.cm.gray)
         axarr[1, i % 5].set_title("u" + str(i))
-    plt.show()
+
+    # plt.show()
+
+
+def main():
+    names = ['Ariel Sharon', 'Colin Powell', 'Donald Rumsfeld', 'George W Bush',
+             'Gerhard Schroeder', 'Hugo Chavez', 'Tony Blair']
+
+    chosen_name = names[0]
+    exc_b(chosen_name)
+    exc_c(chosen_name)
+    exc_d()
 
 
 if __name__ == '__main__':
